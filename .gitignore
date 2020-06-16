@@ -1,0 +1,6 @@
+# Vscode
+.vscode
+.history
+
+# python
+__pycache__

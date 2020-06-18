@@ -28,8 +28,19 @@ class SongScrapper():
         """ Website that we are parsing from. """
         self.__bsaber_site = 'http://www.bsaber.com/songs'
 
-    
+
     def __check_valid_sorted_by_option(self, sorted_by):
+        """Helpder method for scrape_songs().
+        Make sure that sorted_by is a valid param that can be passed to the
+        scrape_songs() method.
+
+        Args:
+            sorted_by (str): Checked to make sure that it is in
+            __sorted_by_options.
+
+        Raises:
+            ValueError: If sorted_by is not a member of __sorted_by_options.
+        """
         if sorted_by not in self.__sorted_by_options:
             raise ValueError("Error: Option must be of the following: "
                              f"{self.__sorted_by_options}")
@@ -62,12 +73,13 @@ class SongScrapper():
         # song so that displaying the song and downloading them is an easier
         # task.
         dict_of_songs = {}
-        page = requests.get(url_to_songs).text
-        soup = BeautifulSoup(page, features='html.parser')
-        #x = soup.find_all(re.compile('^h[1-6]$'))
-        x = soup.find_all(re.compile('^h[6]$'))
+        page_data = requests.get(url_to_songs).text
+        soup = BeautifulSoup(page_data, features='html.parser')
+        # x = soup.find_all(re.compile('^h[1-6]$'))
+        x = soup.find_all(re.compile('a'))
         for y in x:
             print(y)
+        print(x)
         # for y in x:
         #     print(x)
         # print(page)

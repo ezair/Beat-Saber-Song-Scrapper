@@ -4,8 +4,8 @@ import requests
 import re
 
 # Handling file system navigation and paths.
-from os.path import join
-from os import mkdir, listdir, rename
+from os.path import join, exists
+from os import mkdir, listdir, replace
 import zipfile
 
 
@@ -14,11 +14,11 @@ class SongScrapper():
     downloading/extracting them to the proper location.
     """
 
-    def __init__(self, path_to_custom_levels):
+    def __init__(self, path_to_custom_levels_folder):
         """ Constructs a SongScrapper object. """
 
         """ Location that custom songs are going to be saved at. """
-        self.__path_to_custom_levels = path_to_custom_levels
+        self.__path_to_custom_levels = path_to_custom_levels_folder
 
         """ These are the options that we can query songs by. """
         self.__sorted_by_options = ['new', 'top', 'most-difficult']
@@ -101,32 +101,38 @@ class SongScrapper():
     def download_songs_to_folder(self):
         pass
 
-    def __extract_song_in_custom_levels_folder(self, path_song_zipfile):
+
+    def __extract_song_in_custom_levels_folder(self, path_to_song_zipfile):
         # Make a new temp folder to store the zip file into.
-        temp_folder = join(self.__path_to_custom_levels, 'temp_folder')
-        if 'temp_folder' not in listdir(self.__path_to_custom_levels):
-            mkdir(temp_folder)
+        song_folder = path_to_song_zipfile.split('.zip')[0] + \
+            path_to_song_zipfile.split('.zip')[1]
 
-        # Extract the zipfile in the newly created temp folder :)
-        with zipfile.Zipfile(path_song_zipfile, 'r') as zipfile_to_extract:
-            zipfile_to_extract.extract_all(temp_folder)
-            rename(temp_folder, path_song_zipfile)
+        # Don't want to create a folder that already exists.
+        if not exists(song_folder):
+            mkdir(join(self.__path_to_custom_levels, song_folder))
 
+            with zipfile.ZipFile(path_to_song_zipfile, 'r') as zipfile_to_extract:
+                zipfile_to_extract.extractall(song_folder)
 
-    def __extract_all_songs_in_custom_levels_folder(self):
+    def extract_all_songs_in_custom_levels_folder(self):
         all_files_in_custom_level_folder = listdir(self.__path_to_custom_levels)
 
         list_of_zipfiles = [file for file in all_files_in_custom_level_folder
                             if file.endswith('.zip')]
 
-        for zipfile in list_of_zipfiles:
-            self.__extract_song_in_custom_levels_folder(join(self.__path_to_custom_levels, zipfile))
+        for zip_file in list_of_zipfiles:
+            self.__extract_song_in_custom_levels_folder(join(self.__path_to_custom_levels, zip_file))
 
 
 def main():
-    # scrapper = SongScrapper('')
+    custom_levels_path = "D:\Games\Beat.Saber.v1.7.0.ALL.DLC\Beat Saber\Beat Saber_Data\CustomLevels"
+    scrapper = SongScrapper(custom_levels_path)
+
+    # Test out webscrapping.
     # scrapper.scrape_songs(sorted_by='top', time_period='24-hours')
 
+    # Test out extracting.
+    scrapper.extract_all_songs_in_custom_levels_folder()
 
 if __name__ == "__main__":
     main()

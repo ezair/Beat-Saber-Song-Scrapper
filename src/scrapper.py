@@ -5,15 +5,17 @@ import re
 
 # Handling file system navigation and paths.
 from os.path import join
-import shutil
+from os import mkdir, listdir, rename
+import zipfile
 
 
 class SongScrapper():
-    """Object used for scrapping songs from bsaber.com and downloading/
-    extracting them to the proper location.
+    """Object used for scrapping songs from bsaber.com and
+    downloading/extracting them to the proper location.
     """
 
     def __init__(self, path_to_custom_levels):
+        """ Constructs a SongScrapper object. """
 
         """ Location that custom songs are going to be saved at. """
         self.__path_to_custom_levels = path_to_custom_levels
@@ -30,7 +32,7 @@ class SongScrapper():
 
 
     def __check_valid_sorted_by_option(self, sorted_by):
-        """Helpder method for scrape_songs().
+        """Helper method for scrape_songs().
         Make sure that sorted_by is a valid param that can be passed to the
         scrape_songs() method.
 
@@ -47,6 +49,17 @@ class SongScrapper():
 
 
     def __check_valid_time_period(self, time_period):
+        """Make sure that the time_period is a valid param that can be passed
+        to the scrape_songs() method.
+
+        Args:
+            time_period (str): Checked to make sure that it is in
+                                __time_period_options.
+
+        Raises:
+            ValueError: If time_period is not a member of
+                        __time_period_options.
+        """
         if time_period not in self.__time_period_options:
             raise ValueError("Error: Option must be of the following: "
                              f"{self.__time_period_options}")
@@ -84,17 +97,35 @@ class SongScrapper():
         #     print(x)
         # print(page)
 
-    def __download_songs_to_folder(self):
+    # last.
+    def download_songs_to_folder(self):
         pass
 
+    def __extract_song_in_custom_levels_folder(self, path_song_zipfile):
+        # Make a new temp folder to store the zip file into.
+        temp_folder = join(self.__path_to_custom_levels, 'temp_folder')
+        if 'temp_folder' not in listdir(self.__path_to_custom_levels):
+            mkdir(temp_folder)
 
-    def __extract_songs_in_folder(self):
-        pass
+        # Extract the zipfile in the newly created temp folder :)
+        with zipfile.Zipfile(path_song_zipfile, 'r') as zipfile_to_extract:
+            zipfile_to_extract.extract_all(temp_folder)
+            rename(temp_folder, path_song_zipfile)
+
+
+    def __extract_all_songs_in_custom_levels_folder(self):
+        all_files_in_custom_level_folder = listdir(self.__path_to_custom_levels)
+
+        list_of_zipfiles = [file for file in all_files_in_custom_level_folder
+                            if file.endswith('.zip')]
+
+        for zipfile in list_of_zipfiles:
+            self.__extract_song_in_custom_levels_folder(join(self.__path_to_custom_levels, zipfile))
 
 
 def main():
-    scrapper = SongScrapper('')
-    scrapper.scrape_songs(sorted_by='top', time_period='24-hours')
+    # scrapper = SongScrapper('')
+    # scrapper.scrape_songs(sorted_by='top', time_period='24-hours')
 
 
 if __name__ == "__main__":

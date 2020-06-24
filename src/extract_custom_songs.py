@@ -8,10 +8,12 @@ downloaded and extract them into their own folder.
 NOTE: This program assumes that you downloaded you beatsaber zipfiles
       directly in the custom_levels folder.
 """
+
+# Extracting beatsaber zipfiles to the correct place.
 from scrapper import SongScrapper
 
 
-# Path to custom level folder. Each user has it saved somewhere different.
+""" Path to custom level folder. Each user has it saved somewhere different. """
 CUSTOM_LEVEL_FOLDER = "D:\Games\Beat.Saber.v1.7.0.ALL.DLC\Beat Saber\Beat Saber_Data\CustomLevels"
 
 

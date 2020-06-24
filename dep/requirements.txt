@@ -1,0 +1,2 @@
+# Needed for webscrapping.
+beautifulsoup4

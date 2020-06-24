@@ -1,11 +1,25 @@
+"""
+@author Eric Zair
+@file scrapper.py
+
+Contains the SongScrapper object.
+
+SongScrapper is used for extracting zipfiles of custom songs to the custom_levls
+folder for the vr game, beatsaber.
+
+In addition to this, SongScrapper can also scrape songs from the bsaber.com website.
+"""
+
 # Handling webscrapping from bsaber site.
 from bs4 import BeautifulSoup
 import requests
+
+# Parsing html data for finding the correct beatsaber songs.
 import re
 
 # Handling file system navigation and paths.
 from os.path import join, exists
-from os import mkdir, listdir, replace
+from os import mkdir, listdir
 import zipfile
 
 
@@ -14,8 +28,14 @@ class SongScrapper():
     downloading/extracting them to the proper location.
     """
 
+
     def __init__(self, path_to_custom_levels_folder):
-        """ Constructs a SongScrapper object. """
+        """ Constructs a SongScrapper object.
+
+        Args:
+            path_to_custom_levels_folder (str): The location of the custom_levels/
+                                                folder in your beatsaber game.
+        """
 
         """ Location that custom songs are going to be saved at. """
         self.__path_to_custom_levels = path_to_custom_levels_folder
@@ -38,7 +58,7 @@ class SongScrapper():
 
         Args:
             sorted_by (str): Checked to make sure that it is in
-            __sorted_by_options.
+                             __sorted_by_options.
 
         Raises:
             ValueError: If sorted_by is not a member of __sorted_by_options.
@@ -103,6 +123,11 @@ class SongScrapper():
 
 
     def __extract_song_in_custom_levels_folder(self, path_to_song_zipfile):
+        """Helper method for self.extract_all_songs_in_custom_levels_folder().
+
+        Builds a new folder for a custom song and extracts the zipfile's content
+        into that new folder.
+        """
         # Make a new temp folder to store the zip file into.
         song_folder = path_to_song_zipfile.split('.zip')[0] + \
             path_to_song_zipfile.split('.zip')[1]
@@ -114,7 +139,11 @@ class SongScrapper():
             with zipfile.ZipFile(path_to_song_zipfile, 'r') as zipfile_to_extract:
                 zipfile_to_extract.extractall(song_folder)
 
+
     def extract_all_songs_in_custom_levels_folder(self):
+        """Extract each custom song's zipfile into a new folder located
+        in the custom_levels/ folder in the beatsaber game.
+        """
         all_files_in_custom_level_folder = listdir(self.__path_to_custom_levels)
 
         list_of_zipfiles = [file for file in all_files_in_custom_level_folder
@@ -132,7 +161,7 @@ def main():
     # scrapper.scrape_songs(sorted_by='top', time_period='24-hours')
 
     # Test out extracting.
-    scrapper.extract_all_songs_in_custom_levels_folder()
+    # scrapper.extract_all_songs_in_custom_levels_folder()
 
 if __name__ == "__main__":
     main()

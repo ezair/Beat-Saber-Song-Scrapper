@@ -85,38 +85,6 @@ class SongScrapper():
                              f"{self.__time_period_options}")
 
 
-    def scrape_songs(self, sorted_by='new', time_period='all',
-                     number_of_songs=21):
-        # Let's make sure that we are querying by valid options.
-        self.__check_valid_sorted_by_option(sorted_by)
-        self.__check_valid_time_period(time_period)
-
-        # Alright, now that we know that the queries are valid,
-        # we need to construct the proper URL to the webpage that
-        # the songs we want to query are on.
-        url_to_songs = join(self.__bsaber_site, sorted_by)
-
-        # If we are querying for a new song, then no time period
-        # is assigned in the url. Only add a time period to the URL
-        # if the song is not queried for new.
-        if sorted_by != 'new':
-            url_to_songs = join(url_to_songs, '?time=' + time_period)
-
-        # We create a dict of song_names mapped to the download link of the
-        # song so that displaying the song and downloading them is an easier
-        # task.
-        dict_of_songs = {}
-        page_data = requests.get(url_to_songs).text
-        soup = BeautifulSoup(page_data, features='html.parser')
-        # x = soup.find_all(re.compile('^h[1-6]$'))
-        x = soup.find_all(re.compile('a'))
-        for y in x:
-            print(y)
-        print(x)
-        # for y in x:
-        #     print(x)
-        # print(page)
-
     # last.
     def download_songs_to_folder(self):
         pass
@@ -152,16 +120,79 @@ class SongScrapper():
         for zip_file in list_of_zipfiles:
             self.__extract_song_in_custom_levels_folder(join(self.__path_to_custom_levels, zip_file))
 
+    # TBA.
+    def scrape_songs(self, sorted_by='new', time_period='all',
+                     number_of_songs=21):
+        # Let's make sure that we are querying by valid options.
+        self.__check_valid_sorted_by_option(sorted_by)
+        self.__check_valid_time_period(time_period)
+
+        # Alright, now that we know that the queries are valid,
+        # we need to construct the proper URL to the webpage that
+        # the songs we want to query are on.
+        url_to_songs = self.__bsaber_site + "/" + sorted_by
+
+        # If we are querying for a new song, then no time period
+        # is assigned in the url. Only add a time period to the URL
+        # if the song is not queried for new.
+        if sorted_by != 'new':
+            url_to_songs = url_to_songs + '/?time=' + time_period
+
+        # We create a dict of song_names mapped to the download link of the
+        # song so that displaying the song and downloading them is an easier
+        # task.
+        page_data = requests.get(url_to_songs).text
+        soup = BeautifulSoup(page_data, features='html.parser')
+
+        # The song title and song name for each song is contained in a h4 tag.
+        # Also, we only want the amount of songs that the user requests :)
+        song_tags = soup.find_all(re.compile('h4$'))[: number_of_songs]
+
+        # This will be a dict of <song_title, song_download_link>.
+        # It will be the object that we return at the end of this method.
+        dict_of_songs = {}
+
+        for bs4_song_tag in song_tags:
+            # NOTE
+            # This line is disgusting, but basically the bs4 tags look like this:
+            #   <h4 class="entry-title" itemprop="name headline">
+            #   <a href="https://bsaber.com/songs/b6d6/" title="Escape From Midwich Valley">
+            #   Escape From Midwich Valley </a>
+            #   </h4>
+            #
+            # I am parsing them out to find the actual title of the song, as well as the link
+            # to download the song.
+            # In this case, the title is "Escape From Midwich Valley"
+            # and the download link is "https://bsaber.com/songs/b6d6/
+
+            # Find song title.
+            song_tag_as_str = str(bs4_song_tag)
+            html_tags = song_tag_as_str.split('\n')
+            song_title = html_tags[2].strip(' </a>')
+
+            # Find song download link.
+            index_to_start_parsing_from = len('<a href="')
+            index_to_stop_parsing_from = len('<a href="https://bsaber.com/songs/b6da/"') - 1
+            song_link = html_tags[1][index_to_start_parsing_from: index_to_stop_parsing_from]
+
+            dict_of_songs[song_title] = song_link
+
+        return dict_of_songs
+
 
 def main():
     custom_levels_path = "D:\Games\Beat.Saber.v1.7.0.ALL.DLC\Beat Saber\Beat Saber_Data\CustomLevels"
     scrapper = SongScrapper(custom_levels_path)
 
     # Test out webscrapping.
-    # scrapper.scrape_songs(sorted_by='top', time_period='24-hours')
+    scrapped_songs = scrapper.scrape_songs(sorted_by='top', time_period='24-hours')
 
-    # Test out extracting.
-    # scrapper.extract_all_songs_in_custom_levels_folder()
+    print("Song titles: ")
+    for song in scrapped_songs:
+        print("Song Title:", song)
+        print("Song Download Link:", scrapped_songs[song])
+        print()
+
 
 if __name__ == "__main__":
     main()

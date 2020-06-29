@@ -13,6 +13,8 @@ In addition to this, SongScrapper can also scrape songs from the bsaber.com webs
 # Handling webscrapping from bsaber site.
 from bs4 import BeautifulSoup
 import requests
+from urllib import request
+
 import urllib
 
 # Parsing html data for finding the correct beatsaber songs.
@@ -115,6 +117,10 @@ class SongScrapper():
     def extract_all_songs_in_custom_levels_folder(self, display_error_message=True):
         """Extract each custom song's zipfile into a new folder located
         in the custom_levels/ folder in the beatsaber game.
+
+        Args:
+            display_error_message (bool, optional): If the user wants to see the potenital 
+            errors that are thrown. Defaults to True.
         """
         all_files_in_custom_level_folder = listdir(self.__path_to_custom_levels)
 
@@ -125,7 +131,7 @@ class SongScrapper():
             self.__extract_song_in_custom_levels_folder(join(self.__path_to_custom_levels, zip_file))
 
 
-    # TBA.
+    # TODO
     def scrape_songs(self, sorted_by='new', time_period='all',
                      number_of_songs=21):
         # Let's make sure that we are querying by valid options.
@@ -164,37 +170,45 @@ class SongScrapper():
             #   <a href="https://bsaber.com/songs/b6d6/" title="Escape From Midwich Valley">
             #   Escape From Midwich Valley </a>
             #   </h4>
-            #
-            # I am parsing them out to find the actual title of the song, as well as the link
-            # to download the song.
-            # In this case, the title is "Escape From Midwich Valley"
-            # and the download link is "https://bsaber.com/songs/b6d6/
 
             # Find song title.
             song_tag_as_str = str(bs4_song_tag)
             html_tags = song_tag_as_str.split('\n')
             song_title = html_tags[2].strip(' </a>')
 
-            # Find song download link.
-            index_to_start_parsing_from = len('<a href="')
-            index_to_stop_parsing_from = len('<a href="https://bsaber.com/songs/b6da/"') - 1
-            song_link = html_tags[1][index_to_start_parsing_from: index_to_stop_parsing_from]
+            # Build the link that goes to the song's downloadable zip file.
+            ahref_tag = html_tags[1]
+            # The song's link is always <a href="https://bsaber.com/songs/' + the primary
+            # key of the song. The primary key can be found at the end of the link that goes to
+            # the song's webpage.
+            song_primary_key = ahref_tag.replace('<a href="https://bsaber.com/songs/', "")[: 4]
+            song_link = 'https://beatsaver.com/api/download/key/' + song_primary_key
 
             dict_of_songs[song_title] = song_link
 
         return dict_of_songs
 
 
-    # TBA
+    # TODO
     def download_songs(self, dict_of_songs, display_error_message=True):
         for song in dict_of_songs:
+            # Access the file that is located at the songs url path.
+            # Recall that the dict passed in is a dict of <song_title, link_to_song>.
             try:
-                urllib.request.urlretrieve(dict_of_songs[song],
-                                           join(self.__path_to_custom_levels, song) + '.zip')
+                response = request.urlopen(dict_of_songs[song])
+                download_file = str(response.read())
+
+                # Need to copy the info from the downloaded zip file to the new file
+                # which is located in the beatsaber custom levels folder/name_of_song.zip
+                song_save_location = join(self.__path_to_custom_levels, song) + '.zip'
+                new_file_to_store_download = open(song_save_location)
+
+                for line in download_file.split('\\n'):
+                    new_file_to_store_download.write(line + '\n')
+                new_file_to_store_download.close()
             except Exception as e:
                 if display_error_message:
-                    print(e)
-                    print("\n")
+                    print(e + '\n')
 
 
     def download_extract_songs(self, dict_of_songs, display_error_message=True):

@@ -13,6 +13,7 @@ In addition to this, SongScrapper can also scrape songs from the bsaber.com webs
 # Handling webscrapping from bsaber site.
 from bs4 import BeautifulSoup
 import requests
+import urllib
 
 # Parsing html data for finding the correct beatsaber songs.
 import re
@@ -85,12 +86,8 @@ class SongScrapper():
                              f"{self.__time_period_options}")
 
 
-    # last.
-    def download_songs_to_folder(self):
-        pass
-
-
-    def __extract_song_in_custom_levels_folder(self, path_to_song_zipfile):
+    def __extract_song_in_custom_levels_folder(self, path_to_song_zipfile,
+                                               display_error_message=True):
         """Helper method for self.extract_all_songs_in_custom_levels_folder().
 
         Builds a new folder for a custom song and extracts the zipfile's content
@@ -104,11 +101,18 @@ class SongScrapper():
         if not exists(song_folder):
             mkdir(join(self.__path_to_custom_levels, song_folder))
 
-            with zipfile.ZipFile(path_to_song_zipfile, 'r') as zipfile_to_extract:
-                zipfile_to_extract.extractall(song_folder)
+            try:
+                with zipfile.ZipFile(path_to_song_zipfile, 'r') as zipfile_to_extract:
+                    zipfile_to_extract.extractall(song_folder)
+            except Exception as e:
+                if display_error_message:
+                    print(e)
+
+                # Program gets stalled for input if I don't pass here.
+                pass
 
 
-    def extract_all_songs_in_custom_levels_folder(self):
+    def extract_all_songs_in_custom_levels_folder(self, display_error_message=True):
         """Extract each custom song's zipfile into a new folder located
         in the custom_levels/ folder in the beatsaber game.
         """
@@ -119,6 +123,7 @@ class SongScrapper():
 
         for zip_file in list_of_zipfiles:
             self.__extract_song_in_custom_levels_folder(join(self.__path_to_custom_levels, zip_file))
+
 
     # TBA.
     def scrape_songs(self, sorted_by='new', time_period='all',
@@ -180,18 +185,37 @@ class SongScrapper():
         return dict_of_songs
 
 
+    # TBA
+    def download_songs(self, dict_of_songs, display_error_message=True):
+        for song in dict_of_songs:
+            try:
+                urllib.request.urlretrieve(dict_of_songs[song],
+                                           join(self.__path_to_custom_levels, song) + '.zip')
+            except Exception as e:
+                if display_error_message:
+                    print(e)
+                    print("\n")
+
+
+    def download_extract_songs(self, dict_of_songs, display_error_message=True):
+        self.download_songs(dict_of_songs, display_error_message=display_error_message)
+        self.extract_all_songs_in_custom_levels_folder(display_error_message=display_error_message)
+
+
 def main():
     custom_levels_path = "D:\Games\Beat.Saber.v1.7.0.ALL.DLC\Beat Saber\Beat Saber_Data\CustomLevels"
     scrapper = SongScrapper(custom_levels_path)
 
     # Test out webscrapping.
-    scrapped_songs = scrapper.scrape_songs(sorted_by='top', time_period='24-hours')
+    scrapped_songs = scrapper.scrape_songs()
 
-    print("Song titles: ")
-    for song in scrapped_songs:
-        print("Song Title:", song)
-        print("Song Download Link:", scrapped_songs[song])
-        print()
+    # print("Song titles: ")
+    # for song in scrapped_songs:
+    #     print("Song Title:", song)
+    #     print("Song Download Link:", scrapped_songs[song])
+    #     print()
+
+    scrapper.download_extract_songs(scrapped_songs)
 
 
 if __name__ == "__main__":

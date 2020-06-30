@@ -203,7 +203,7 @@ class SongScrapper():
         the custom_levels/ beatsaber folder. Each song is a .zip file when downloaded.
 
         Args:
-            dict_of_songs (dict(str)): A dict containing a collection of songs.
+            dict_of_songs dict(str): A dict containing a collection of songs.
             <song_name> -> <link to song>.
 
             display_error_message (bool, optional): True if user wants to output an error if it occurs
@@ -236,6 +236,15 @@ class SongScrapper():
 
 
     def download_extract_songs(self, dict_of_songs, display_error_message=True):
+        """Download all songs in the given dict and then extract them in the custom_levels
+        beatsaber folder.
+
+        Args:
+            dict_of_songs dict(str, str): Dict <song_title> -> <song_download_link>
+
+            display_error_message (bool, optional): True if user wants to display possible errors,
+                                                    False otherwise. Defaults to True.
+        """
         self.download_songs(dict_of_songs, display_error_message=display_error_message)
         self.extract_all_songs_in_custom_levels_folder(display_error_message=display_error_message)
 

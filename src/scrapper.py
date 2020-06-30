@@ -13,9 +13,6 @@ In addition to this, SongScrapper can also scrape songs from the bsaber.com webs
 # Handling webscrapping from bsaber site.
 from bs4 import BeautifulSoup
 import requests
-from urllib import request
-
-import urllib
 
 # Parsing html data for finding the correct beatsaber songs.
 import re
@@ -24,6 +21,7 @@ import re
 from os.path import join, exists
 from os import mkdir, listdir
 import zipfile
+import shutil
 
 
 class SongScrapper():
@@ -119,7 +117,7 @@ class SongScrapper():
         in the custom_levels/ folder in the beatsaber game.
 
         Args:
-            display_error_message (bool, optional): If the user wants to see the potenital 
+            display_error_message (bool, optional): If the user wants to see the potential.
             errors that are thrown. Defaults to True.
         """
         all_files_in_custom_level_folder = listdir(self.__path_to_custom_levels)
@@ -131,9 +129,25 @@ class SongScrapper():
             self.__extract_song_in_custom_levels_folder(join(self.__path_to_custom_levels, zip_file))
 
 
-    # TODO
     def scrape_songs(self, sorted_by='new', time_period='all',
                      number_of_songs=21):
+        """Return a dict object where each entry represents a song_name mapped to a song_download_link.
+
+        Args:
+            sorted_by (str, optional): The type of song you are querying for.
+                                       Options: ['new', 'top', 'most-difficult'].
+                                       Defaults to 'new'.
+
+            time_period (str, optional): The time period that you want to download a song from.
+                                         Options: ['24-hours', '7-days', '30-days', '3-months', 'all']
+                                        Defaults to 'all'.
+
+            number_of_songs (int, optional): [description]. Defaults to 21.
+
+        Returns:
+            dict(str, str): dict with each entry representing a song.
+            <song_name> -> <song_download_link>.
+        """
         # Let's make sure that we are querying by valid options.
         self.__check_valid_sorted_by_option(sorted_by)
         self.__check_valid_time_period(time_period)
@@ -164,12 +178,6 @@ class SongScrapper():
         dict_of_songs = {}
 
         for bs4_song_tag in song_tags:
-            # NOTE
-            # This line is disgusting, but basically the bs4 tags look like this:
-            #   <h4 class="entry-title" itemprop="name headline">
-            #   <a href="https://bsaber.com/songs/b6d6/" title="Escape From Midwich Valley">
-            #   Escape From Midwich Valley </a>
-            #   </h4>
 
             # Find song title.
             song_tag_as_str = str(bs4_song_tag)
@@ -178,6 +186,7 @@ class SongScrapper():
 
             # Build the link that goes to the song's downloadable zip file.
             ahref_tag = html_tags[1]
+
             # The song's link is always <a href="https://bsaber.com/songs/' + the primary
             # key of the song. The primary key can be found at the end of the link that goes to
             # the song's webpage.
@@ -189,26 +198,41 @@ class SongScrapper():
         return dict_of_songs
 
 
-    # TODO
     def download_songs(self, dict_of_songs, display_error_message=True):
+        """Given a dict_of_songs <song_name> -> <song_download_link>, we download each song to
+        the custom_levels/ beatsaber folder. Each song is a .zip file when downloaded.
+
+        Args:
+            dict_of_songs (dict(str)): A dict containing a collection of songs.
+            <song_name> -> <link to song>.
+
+            display_error_message (bool, optional): True if user wants to output an error if it occurs
+                                                    , False otherwise. Defaults to True.
+        """
         for song in dict_of_songs:
-            # Access the file that is located at the songs url path.
-            # Recall that the dict passed in is a dict of <song_title, link_to_song>.
             try:
-                response = request.urlopen(dict_of_songs[song])
-                download_file = str(response.read())
+                # This user agent header is required so the page does not through a 403
+                # permission denied error.
+                headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) '
+                                         'AppleWebKit/537.36 (KHTML, like Gecko) '
+                                         'Chrome/39.0.2171.95 Safari/537.36'}
 
-                # Need to copy the info from the downloaded zip file to the new file
-                # which is located in the beatsaber custom levels folder/name_of_song.zip
+                # Alright, lets access the location of where the .zip file we want to download is.
+                # In order to "download" it we need to copy it's file contents to a local file on
+                # our machine.
+                r = requests.get(dict_of_songs[song], stream=True, headers=headers)
+
+                # Here is the local file on our machine that we will copy the .zip file content to.
                 song_save_location = join(self.__path_to_custom_levels, song) + '.zip'
-                new_file_to_store_download = open(song_save_location)
 
-                for line in download_file.split('\\n'):
-                    new_file_to_store_download.write(line + '\n')
-                new_file_to_store_download.close()
+                with open(song_save_location, 'wb') as download_file:
+                    r.raw.decode_content = True
+                    shutil.copyfileobj(r.raw, download_file)
+
+            # If we get a 404 or or 403 error, we come here.
             except Exception as e:
                 if display_error_message:
-                    print(e + '\n')
+                    print(e)
 
 
     def download_extract_songs(self, dict_of_songs, display_error_message=True):
@@ -223,11 +247,10 @@ def main():
     # Test out webscrapping.
     scrapped_songs = scrapper.scrape_songs()
 
-    # print("Song titles: ")
-    # for song in scrapped_songs:
-    #     print("Song Title:", song)
-    #     print("Song Download Link:", scrapped_songs[song])
-    #     print()
+    print("Song titles: ")
+    for song in scrapped_songs:
+        print("Song Title:", song)
+        print("Song Download Link:", scrapped_songs[song], '\n')
 
     scrapper.download_extract_songs(scrapped_songs)
 

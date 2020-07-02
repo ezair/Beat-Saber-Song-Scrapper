@@ -52,6 +52,24 @@ class SongScrapper():
         self.__bsaber_site = 'http://www.bsaber.com/songs'
 
 
+    def sorted_by_options(self):
+        """Return all possible sorting options that the user can query songs with.
+
+        Returns:
+            list(str): The sorting options that the user can query songs with.
+        """
+        return self.__sorted_by_options
+
+
+    def time_period_options(self):
+        """Return all possible time periods that the user can scrape songs with.
+
+        Returns:
+            list(str): The time periods that a user can scrape songs with.
+        """
+        return self.__time_period_options
+
+
     def __check_valid_sorted_by_option(self, sorted_by):
         """Helper method for scrape_songs().
         Make sure that sorted_by is a valid param that can be passed to the

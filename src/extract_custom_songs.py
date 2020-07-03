@@ -10,7 +10,7 @@ NOTE: This program assumes that you downloaded you beatsaber zipfiles
 """
 
 # Extracting beatsaber zipfiles to the correct place.
-from scrapper import SongScrapper
+from bsaber.scrapper import SongScrapper
 
 
 """ Path to custom level folder. Each user has it saved somewhere different. """

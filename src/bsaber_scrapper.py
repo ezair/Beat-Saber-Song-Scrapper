@@ -85,6 +85,7 @@ def get_song_number(scrapped_songs_dict):
 
 
 # TODO
+## Doesn't work, need to re-word: dict to list to get key, then give key. to other dict.
 def add_new_record_to_dict_of_songs_to_download(scrapped_songs_dict, dict_of_songs_to_download,
                                                 selected_song_number):
     # Convert the dict of songs that we have to a list of tuples where each entry is
@@ -92,11 +93,11 @@ def add_new_record_to_dict_of_songs_to_download(scrapped_songs_dict, dict_of_son
     #
     # This is really useful because now we can map our selected_song_number that the user choose
     # to the entry in the scrapped_songs_dict.
-    dict_of_songs_as_tuple = [(song_name, download_link)
-                              for song_name, download_link in scrapped_songs_dict.items()]
 
-    dict_of_songs_to_download[dict_of_songs_as_tuple[selected_song_number] = \
-        dict_of_songs_as_tuple[selected_song_number[1]]
+    list_of_songs = list(scrapped_songs_dict)
+    song_user_wants_to_download = list_of_songs[selected_song_number - 1]
+    dict_of_songs_to_download[song_user_wants_to_download] = \
+        scrapped_songs_dict[song_user_wants_to_download]
 
 
 def main():
@@ -114,10 +115,10 @@ def main():
 
         # User choose which single song to download.
         selected_song_number = get_song_number(scrapped_songs_dict)
-
+        print("")
         # Add the song that the user wants to the dict of songs that we will download.
         # These songs will later be downloaded.
-        add_new_record_to_dict_of_songs_to_download(scrapped_songs_dict, selected_song_number,
+        add_new_record_to_dict_of_songs_to_download(scrapped_songs_dict, dict_of_songs_to_download,
                                                     selected_song_number)
 
         print(dict_of_songs_to_download)

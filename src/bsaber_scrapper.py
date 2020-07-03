@@ -27,7 +27,7 @@ def get_sorting_option_from_user():
         elif sorting_option == 2:
             return "top"
         elif sorting_option == 3:
-            return "most difficult"
+            return "most-difficult"
         else:
             print(f"\nSorry, {sorting_option} is not a valid option.")
 
@@ -64,44 +64,65 @@ def get_time_period_option_from_user():
 
 
 def display_songs_in_scrapped_dict(scrapped_songs_dict):
+    """Display the songs that the user can pick from to download.
+
+    Args:
+        scrapped_songs_dict dict(str, str): dict containing the songs that a user can download.
+    """
     for i in range(1, len(scrapped_songs_dict) + 1):
         print(f"{i}. {list(scrapped_songs_dict.keys())[i - 1]}")
 
 
-def get_song_number(scrapped_songs_dict):
+def display_other_options():
+    """Print out the options that a user can do that are not just downloading a song.
+    """
+    print("> - Next Song page.")
+    print("< - Previous song page.")
+    print("q - to quit")
+
+
+def get_user_option(scrapped_songs_dict):
     while True:
         display_songs_in_scrapped_dict(scrapped_songs_dict)
 
-        try:
-            song_number = int(input("\nSelect the song you want to download: "))
-        except ValueError:
-            print("\nSorry, that is not a number! Please enter a number.")
-            continue
+        user_option = input("\nSelect the song you want to download or "
+                            "select another option: ").lower()
 
-        if song_number < 1 or song_number > len(scrapped_songs_dict):
-            print("\nError, please choose a valid number.")
+        # If the user enters in a digit, that means they are trying to find a song.
+        # Need to make sure that the song is valid.
+        if user_option.isdigit():
+            song_number = int(user_option)
+            if song_number < 1 or song_number > len(scrapped_songs_dict):
+                print("\nError, please choose a valid number.")
+            else:
+                return user_option
+
+        # User did not enter a digit, so they must be trying to enter a symbol.
+        # We want to make sure that they enter a valid symbol.
+        if user_option not in ['q', '<', '>', '?']:
+            print("\nError, that is not a valid option. Please choice a valid option.")
         else:
-            return song_number
+            return user_option
 
 
-# TODO
-## Doesn't work, need to re-word: dict to list to get key, then give key. to other dict.
-def add_new_record_to_dict_of_songs_to_download(scrapped_songs_dict, dict_of_songs_to_download,
+def add_new_record_to_dict_of_songs_to_download(scrapped_songs_dict, dict_of_songs,
                                                 selected_song_number):
     # Convert the dict of songs that we have to a list of tuples where each entry is
     # (name of the song, the link to download the song).
     #
     # This is really useful because now we can map our selected_song_number that the user choose
     # to the entry in the scrapped_songs_dict.
-
-    list_of_songs = list(scrapped_songs_dict)
-    song_user_wants_to_download = list_of_songs[selected_song_number - 1]
-    dict_of_songs_to_download[song_user_wants_to_download] = \
+    list_of_song_names = list(scrapped_songs_dict)
+    song_user_wants_to_download = list_of_song_names[selected_song_number - 1]
+    dict_of_songs[song_user_wants_to_download] = \
         scrapped_songs_dict[song_user_wants_to_download]
 
 
 def main():
+    # All songs that the user is going to download will go here.
+    # At the end of the method these will be downloaded and extracted.
     dict_of_songs_to_download = {}
+
     while True:
         # Locals might need to move up a row. TBA.
         sorting_option = get_sorting_option_from_user()
@@ -113,15 +134,24 @@ def main():
         scrapper = SongScrapper(CUSTOM_LEVEL_FOLDER)
         scrapped_songs_dict = scrapper.scrape_songs(sorted_by=sorting_option, time_period=time_period)
 
-        # User choose which single song to download.
-        selected_song_number = get_song_number(scrapped_songs_dict)
-        print("")
-        # Add the song that the user wants to the dict of songs that we will download.
-        # These songs will later be downloaded.
-        add_new_record_to_dict_of_songs_to_download(scrapped_songs_dict, dict_of_songs_to_download,
-                                                    selected_song_number)
+        # User decides if they wanna download a song, go to next/previous page of songs, or quit.
+        user_option = get_user_option(scrapped_songs_dict)
 
-        print(dict_of_songs_to_download)
+        # Download the songs, exit the program.
+        if user_option == 'q' or user_option == 'quit':
+            scrapper.download_extract_songs(dict_of_songs_to_download)
+            if dict_of_songs_to_download:
+                print("Selected songs have been downloaded and extracted :)")
+            exit(0)
+
+        # Since the input is a digit, we know that the user wants to download a song,
+        # so we can go ahead and add that song to our dict of songs that we will download.
+        elif user_option.isdigit():
+            add_new_record_to_dict_of_songs_to_download(scrapped_songs_dict=scrapped_songs_dict,
+                                                        dict_of_songs=dict_of_songs_to_download,
+                                                        selected_song_number=int(user_option))
+
+        print(f"\nCurrent list of downloaded songs: {[song for song in dict_of_songs_to_download]}")
 
 
 if __name__ == "__main__":

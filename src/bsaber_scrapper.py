@@ -19,7 +19,7 @@ def get_sorting_option_from_user():
                                        "3. Most Difficult\n\n"
                                        "Enter: "))
         except ValueError:
-            print("\nSorry, that is not a number.")
+            print("\nSorry, that is not a number.\n")
             continue
 
         if sorting_option == 1:
@@ -84,6 +84,7 @@ def display_other_options():
 def get_user_option(scrapped_songs_dict):
     while True:
         display_songs_in_scrapped_dict(scrapped_songs_dict)
+        display_other_options()
 
         user_option = input("\nSelect the song you want to download or "
                             "select another option: ").lower()
@@ -93,14 +94,13 @@ def get_user_option(scrapped_songs_dict):
         if user_option.isdigit():
             song_number = int(user_option)
             if song_number < 1 or song_number > len(scrapped_songs_dict):
-                print("\nError, please choose a valid number.")
+                print("\nError, please choose a valid number.\n")
             else:
                 return user_option
-
         # User did not enter a digit, so they must be trying to enter a symbol.
         # We want to make sure that they enter a valid symbol.
-        if user_option not in ['q', '<', '>', '?']:
-            print("\nError, that is not a valid option. Please choice a valid option.")
+        elif user_option not in ['q', '<', '>', '?']:
+            print("\nError, that is not a valid option. Please choice a valid option.\n")
         else:
             return user_option
 
@@ -140,8 +140,14 @@ def main():
         # Download the songs, exit the program.
         if user_option == 'q' or user_option == 'quit':
             scrapper.download_extract_songs(dict_of_songs_to_download)
+
             if dict_of_songs_to_download:
-                print("Selected songs have been downloaded and extracted :)")
+                print("The following songs have been downloaded and extracted: ")
+
+                for downloaded_song in dict_of_songs_to_download:
+                    print(f"\t{downloaded_song}")
+                print("\nHave a good day!\n")
+
             exit(0)
 
         # Since the input is a digit, we know that the user wants to download a song,

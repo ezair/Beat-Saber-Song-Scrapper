@@ -184,8 +184,12 @@ class SongScrapper():
         # We create a dict of song_names mapped to the download link of the
         # song so that displaying the song and downloading them is an easier
         # task.
-        page_data = requests.get(url_to_songs).text
-        soup = BeautifulSoup(page_data, features='html.parser')
+        request = requests.get(url_to_songs)
+
+        if request.status_code != 200:
+            raise requests.exceptions.HttpError('Error in scrape_songs(), unable to access file.')
+
+        soup = BeautifulSoup(request.text, features='html.parser')
 
         # The song title and song name for each song is contained in a h4 tag.
         # Also, we only want the amount of songs that the user requests :)

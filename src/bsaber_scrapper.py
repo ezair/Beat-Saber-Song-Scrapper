@@ -93,14 +93,17 @@ def get_user_option(scrapped_songs_dict):
         # Need to make sure that the song is valid.
         if user_option.isdigit():
             song_number = int(user_option)
+
             if song_number < 1 or song_number > len(scrapped_songs_dict):
                 print("\nError, please choose a valid number.\n")
             else:
                 return user_option
+
         # User did not enter a digit, so they must be trying to enter a symbol.
         # We want to make sure that they enter a valid symbol.
         elif user_option not in ['q', '<', '>', '?']:
             print("\nError, that is not a valid option. Please choice a valid option.\n")
+
         else:
             return user_option
 
@@ -113,7 +116,9 @@ def add_new_record_to_dict_of_songs_to_download(scrapped_songs_dict, dict_of_son
     # This is really useful because now we can map our selected_song_number that the user choose
     # to the entry in the scrapped_songs_dict.
     list_of_song_names = list(scrapped_songs_dict)
+
     song_user_wants_to_download = list_of_song_names[selected_song_number - 1]
+
     dict_of_songs[song_user_wants_to_download] = \
         scrapped_songs_dict[song_user_wants_to_download]
 
@@ -146,13 +151,18 @@ def main():
 
                 for downloaded_song in dict_of_songs_to_download:
                     print(f"\t{downloaded_song}")
+
                 print("\nHave a good day!\n")
 
             exit(0)
 
         # Since the input is a digit, we know that the user wants to download a song,
         # so we can go ahead and add that song to our dict of songs that we will download.
+        #
+        # The number has already been checked to be in the correct range,
+        # so no need to worry about that.
         elif user_option.isdigit():
+
             add_new_record_to_dict_of_songs_to_download(scrapped_songs_dict=scrapped_songs_dict,
                                                         dict_of_songs=dict_of_songs_to_download,
                                                         selected_song_number=int(user_option))

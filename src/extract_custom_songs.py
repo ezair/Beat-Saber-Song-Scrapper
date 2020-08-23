@@ -8,7 +8,7 @@ NOTE: This program assumes that you downloaded you beatsaber zipfiles
 """
 
 # Extracting beatsaber zipfiles to the correct place.
-from bsaber.scrapper import SongScrapper
+from bsaber.scraper import SongScraper
 
 
 """ Path to custom level folder. Each user has it saved somewhere different. """
@@ -16,8 +16,8 @@ CUSTOM_LEVEL_FOLDER = "D:\Games\Beat.Saber.v1.7.0.ALL.DLC\Beat Saber\Beat Saber_
 
 
 def main():
-    scrapper = SongScrapper(CUSTOM_LEVEL_FOLDER)
-    scrapper.extract_all_songs_in_custom_levels_folder()
+    scraper = SongScraper(CUSTOM_LEVEL_FOLDER)
+    scraper.extract_all_songs_in_custom_levels_folder()
     print("All songs have been extracted.")
 
 

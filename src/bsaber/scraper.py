@@ -299,24 +299,3 @@ class SongScraper():
         """
         self.download_songs(dict_of_songs, display_error_message=display_error_message)
         self.extract_all_songs_in_custom_levels_folder(display_error_message=display_error_message)
-
-
-def main():
-    custom_levels_path = "D:\\Games\\Beat.Saber.v1.7.0.ALL.DLC\\Beat Saber\\" \
-                         "Beat Saber_Data\\CustomLevels"
-
-    scraper = SongScraper(custom_levels_path)
-
-    # Test out webscrapping.
-    scrapped_songs = scraper.scrape_songs()
-
-    print("Song titles: ")
-    for song in scrapped_songs:
-        print("Song Title:", song)
-        print("Song Download Link:", scrapped_songs[song], '\n')
-
-    scraper.download_extract_songs(scrapped_songs)
-
-
-if __name__ == "__main__":
-    main()

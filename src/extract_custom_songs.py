@@ -1,6 +1,7 @@
 """
 @author Eric Zair
 @file extract_custom_songs.py
+
 A very simple program that is used to take all beatsaber songs that were
 downloaded and extract them into their own folder.
 NOTE: This program assumes that you downloaded you beatsaber zipfiles

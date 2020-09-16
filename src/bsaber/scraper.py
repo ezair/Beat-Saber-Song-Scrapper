@@ -30,7 +30,7 @@ class SongScraper():
     """
 
     def __init__(self, path_to_custom_levels_folder):
-        """ Constructs a SongScrpper object.
+        """ Constructs a SongScraper object.
 
         Args:
             path_to_custom_levels_folder (str): The location of the custom_levels/
@@ -124,7 +124,7 @@ class SongScraper():
                 if display_error_message:
                     print(e)
 
-                # Program gets stalled for input if I don't pass here.
+                # Program gets stalled for input if we do not pause here.
                 pass
 
 
@@ -145,7 +145,7 @@ class SongScraper():
             self.__extract_song_in_custom_levels_folder(join(self.__path_to_custom_levels, zip_file))
 
 
-    def __find_songs_given_url(self, url_to_songs, number_of_songs=21):
+    def __find_songs_given_url(self, url_to_songs, number_of_songs=21, custom_song_search=False):
         """Given the url to songs we want to scrape, we return a dict containing each song's name
            and download link.
 
@@ -165,24 +165,24 @@ class SongScraper():
 
         soup = BeautifulSoup(request.text, features='html.parser')
 
+        # If a custom song search is preformed then we need to cut the first song that is scraped out
+        # of the list because when we query to get all of the songs on the page, the custom search
+        # itself is added as the first member of the list.
+        starting_index_for_song_tags = 1 if custom_song_search else 0
+
         # The song title and song name for each song is contained in a h4 tag.
         # Also, we only want the amount of songs that the user requests :)
-        print(url_to_songs)
-        song_tags = soup.find_all(re.compile('h4$'))[: number_of_songs]
+        song_tags = soup.find_all(re.compile('h4$'))[starting_index_for_song_tags: number_of_songs]
 
         # This will be a dict of <song_title, song_download_link>.
         # It will be the object that we return at the end of this method.
         dict_of_songs = {}
 
         for bs4_song_tag in song_tags:
-
-            # Find song title.
+            # Okay, now let's find song title.
             song_tag_as_str = str(bs4_song_tag)
             html_tags = song_tag_as_str.split('\n')
-            print(f"htlm_tags: {html_tags}")
             song_title = html_tags[2].strip(' </a>')
-
-            # Build the link that goes to the song's downloadable zip file.
             ahref_tag = html_tags[1]
 
             # The song's link is always <a href="https://bsaber.com/songs/' + the primary
@@ -246,8 +246,7 @@ class SongScraper():
         # A search for the song "this is an example " would construct the link:
         # https://bsaber.com/?s=this+is+an+example&orderby=relevance&order=DESC&
         url_to_song = self.__bsaber_site + "/?s=" + song.replace(' ', '+') + '&'
-
-        return self.__find_songs_given_url(url_to_song)
+        return self.__find_songs_given_url(url_to_song, custom_song_search=True)
 
 
     def download_songs(self, dict_of_songs, display_error_message=True):

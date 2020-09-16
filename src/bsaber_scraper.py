@@ -143,6 +143,17 @@ def get_user_option(scrapped_songs_dict):
 
 def add_new_record_to_dict_of_songs_to_download(scrapped_songs_dict, dict_of_songs,
                                                 selected_song_number):
+    """Add the song that the user wants to download our dict of songs to download.
+
+    Args:
+        scrapped_songs_dict (dict[str, str]): Contains all the songs that we have scrapped from
+                                              bsaber.com
+
+        dict_of_songs (dict[str, str]): Contains all of the songs that the user wants to download.
+
+        selected_song_number (int): The number that maps to which song in the scrapped_songs_dict
+                                    that the user wants to download.
+    """
     # Convert the dict of songs that we have to a list of tuples where each entry is
     # (name of the song, the link to download the song).
     #
@@ -157,7 +168,7 @@ def download_songs_exit_program(scraper, dict_of_songs_to_download):
     """Download songs contained in passed in dict and exit the program.
 
     Args:
-        scraper (Scraper): The Scraper object used to download in the passed in dict.
+        scraper (SongScraper): The Scraper object used to download in the passed in dict.
 
         dict_of_songs_to_download (dict[str, str]): Dict of song names mapped to the
                                                     download link of the song.
@@ -182,10 +193,14 @@ def main():
     scraper = SongScraper(CUSTOM_LEVEL_FOLDER)
 
     while True:
+        scraped_songs_dict = {}
+
         if user_wants_to_search_for_specific_song():
             # The user is going to search for a song via the search bar on bsaber.com.
             song_user_wants_to_search_for = input("Enter the song you want to search for: ")
-            scraper.get_searched_for_song_results(song=song_user_wants_to_search_for)
+
+            scraped_songs_dict = \
+                scraper.get_searched_for_song_results(song=song_user_wants_to_search_for)
         else:
             # The user is going to query for a song by providing a sorting type and a time period.
             sorting_option = get_sorting_option_from_user()
@@ -194,12 +209,13 @@ def main():
             # scrape_songs() is called with 'all' by default when sorted_by is given.
             time_period = 'all' if sorting_option == 'new' else get_time_period_option_from_user()
 
-            scrapped_songs_dict = scraper.get_song_results(sorted_by=sorting_option,
-                                                           time_period=time_period)
+            scraped_songs_dict = scraper.get_song_results(sorted_by=sorting_option,
+                                                          time_period=time_period)
 
-        # User decides if they wanna download a song, go to next/previous page of songs, or quit.
-        user_option = get_user_option(scrapped_songs_dict)
+        # User decides if they want to download a song, go to next/previous page of songs, or quit.
+        user_option = get_user_option(scraped_songs_dict)
 
+        # The user wants to quit the program, let's exit.
         if user_option in ['q', 'quit']:
             download_songs_exit_program(scraper, dict_of_songs_to_download)
 
@@ -207,7 +223,7 @@ def main():
         # so we can go ahead and add that song to our dict of songs that we will download.
         elif user_option.isdigit():
 
-            add_new_record_to_dict_of_songs_to_download(scrapped_songs_dict=scrapped_songs_dict,
+            add_new_record_to_dict_of_songs_to_download(scrapped_songs_dict=scraped_songs_dict,
                                                         dict_of_songs=dict_of_songs_to_download,
                                                         selected_song_number=int(user_option))
 

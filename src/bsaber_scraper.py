@@ -7,7 +7,7 @@ adding them to the customlevels folder, and extracing them withthe name of the s
 the foldername.
 """
 
-# For scraping, download, and extracting beatsaber custom songs.
+# For scraping, downloading, and extracting beatsaber custom songs.
 from bsaber.scraper import SongScraper
 
 

@@ -35,6 +35,8 @@ def user_wants_to_search_for_specific_song():
         if option in range(1, 3):
             return options[option - 1]
 
+        print(f"Sorry, \"{option}\" is not a valid option.")
+
 
 def get_sorting_option_from_user():
     """Return the sorting option that the user wants to sort songs by.
@@ -57,8 +59,8 @@ def get_sorting_option_from_user():
         valid_sorting_options = ['new', 'top', 'most-difficult']
         if sorting_option in range(1, 4):
             return valid_sorting_options[sorting_option - 1]
-        else:
-            print(f"\nSorry, {sorting_option} is not a valid option.")
+
+        print(f"\nSorry, {sorting_option} is not a valid option.")
 
 
 def get_time_period_option_from_user():
@@ -84,8 +86,8 @@ def get_time_period_option_from_user():
 
         if time_period in range(1, 5):
             return valid_time_periods[time_period - 1]
-        else:
-            print(f"\nSorry, {time_period} is not a valid option.")
+
+        print(f"\nSorry, {time_period} is not a valid option.")
 
 
 def display_songs_in_scrapped_dict(scrapped_songs_dict):
@@ -127,18 +129,17 @@ def get_user_option(scrapped_songs_dict):
         if user_option.isdigit():
             song_number = int(user_option)
 
-            if song_number < 1 or song_number > len(scrapped_songs_dict):
-                print("\nError, please choose a valid number.\n")
-            else:
+            if song_number in range(1, len(scrapped_songs_dict) + 1):
                 return user_option
+            print("\nError, please choose a valid number.\n")
 
         # User did not enter a digit, so they must be trying to enter a symbol.
         # We want to make sure that they enter a valid symbol.
-        elif user_option not in ['q', '<', '>', '?']:
-            print("\nError, that is not a valid option. Please choice a valid option.\n")
-
-        else:
+        if user_option in ['q', '<', '>', '?']:
             return user_option
+
+        print("\nError, that is not a valid option. Please choice a valid option.\n")
+
 
 
 def add_new_record_to_dict_of_songs_to_download(scrapped_songs_dict, dict_of_songs,

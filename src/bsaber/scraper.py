@@ -154,6 +154,10 @@ class SongScraper():
 
             number_of_songs (int, optional): The number of songs we want to grab. Defaults to 21.
 
+            custom_song_search (bool, optional): True if we are doing a custom song search,
+                                                 False otherwise. Defaults to False.
+
+
         Returns:
             dict(str, str): dict with each entry representing a song.
             <song_name> -> <song_download_link>.
